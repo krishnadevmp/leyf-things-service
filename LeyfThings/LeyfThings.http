@@ -1,0 +1,6 @@
+@LifeThings_HostAddress = http://localhost:5128
+
+GET {{LifeThings_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

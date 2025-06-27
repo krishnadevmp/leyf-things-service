@@ -1,0 +1,51 @@
+## Build artifacts
+bin/
+obj/
+out/
+
+## User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## OS generated files
+.DS_Store
+Thumbs.db
+
+## Logs
+*.log
+
+## Visual Studio files
+.vscode/
+.vs/
+
+## NuGet packages
+*.nupkg
+packages/
+.nuget/
+
+## Entity Framework
+Migrations/
+
+## Publish output
+publish/
+
+## ASP.NET runtime files
+wwwroot/dist/
+wwwroot/node_modules/
+
+## Rider IDE
+.idea/
+
+## Others
+*.db
+*.sqlite
+*.bak
+*.mdf
+*.ldf
+
+## Environment files
+.env
+.env.*
+secrets.json
