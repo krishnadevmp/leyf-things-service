@@ -18,14 +18,14 @@ namespace LeyfThings.Services
         public async Task<List<Goal>> GetGoalsAsync()
         {
             return await _context.Goals
-                .Include(g => g.SubGoals)
+                .Include(g => g.MileStones)
                 .ToListAsync();
         }
 
         public async Task<Goal?> GetGoalAsync(Guid id)
         {
             return await _context.Goals
-                .Include(g => g.SubGoals)
+                .Include(g => g.MileStones)
                 .FirstOrDefaultAsync(g => g.Id == id);
         }
 
@@ -40,7 +40,7 @@ namespace LeyfThings.Services
                 TargetDate = dto.TargetDate,
                 Priority = dto.Priority,
                 Status = dto.Status,
-                SubGoals = dto.SubGoals.Select(s => new SubGoals
+                MileStones = dto.MileStones.Select(s => new MileStone
                 {
                     Id = Guid.NewGuid(),
                     Title = s.Title,
@@ -50,8 +50,8 @@ namespace LeyfThings.Services
             };
 
             // Auto-calculate progress
-            goal.Progress = goal.SubGoals.Count == 0 ? 0 :
-                (int)(goal.SubGoals.Count(s => s.IsComplete) * 100.0 / goal.SubGoals.Count);
+            goal.Progress = goal.MileStones.Count == 0 ? 0 :
+                (int)(goal.MileStones.Count(s => s.IsComplete) * 100.0 / goal.MileStones.Count);
 
             _context.Goals.Add(goal);
             await _context.SaveChangesAsync();
@@ -61,7 +61,7 @@ namespace LeyfThings.Services
         public async Task<bool> UpdateGoalAsync(Guid id, GoalDTO dto)
         {
             var goal = await _context.Goals
-                .Include(g => g.SubGoals)
+                .Include(g => g.MileStones)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
             if (goal == null) return false;
@@ -73,9 +73,9 @@ namespace LeyfThings.Services
             goal.Priority = dto.Priority;
             goal.Status = dto.Status;
 
-            // Replace subgoals
-            _context.SubGoals.RemoveRange(goal.SubGoals);
-            goal.SubGoals = dto.SubGoals.Select(s => new SubGoals
+            // Replace milestones
+            _context.MileStones.RemoveRange(goal.MileStones);
+            goal.MileStones = dto.MileStones.Select(s => new MileStone
             {
                 Id = Guid.NewGuid(),
                 Title = s.Title,
@@ -84,8 +84,8 @@ namespace LeyfThings.Services
             }).ToList();
 
             // Recalculate progress
-            goal.Progress = goal.SubGoals.Count == 0 ? 0 :
-                (int)(goal.SubGoals.Count(s => s.IsComplete) * 100.0 / goal.SubGoals.Count);
+            goal.Progress = goal.MileStones.Count == 0 ? 0 :
+                (int)(goal.MileStones.Count(s => s.IsComplete) * 100.0 / goal.MileStones.Count);
 
             await _context.SaveChangesAsync();
             return true;

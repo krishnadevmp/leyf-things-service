@@ -10,6 +10,6 @@
         public string Priority { get; set; } = "Medium";
         public string Status { get; set; } = "Not Started";
         public int Progress { get; set; } = 0;
-        public List<SubGoals> SubGoals { get; set; } = new();
+        public List<MileStone> MileStones { get; set; } = new();
     }
 }

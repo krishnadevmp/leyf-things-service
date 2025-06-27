@@ -1,6 +1,6 @@
 ﻿namespace LeyfThings.DTOs
 {
-    public class SubGoalDTO
+    public class MileStoneDTO
     {
         public string Title { get; set; }
         public bool IsComplete { get; set; }

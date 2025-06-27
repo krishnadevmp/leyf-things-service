@@ -8,7 +8,7 @@ namespace LeyfThings.LeyfThingsDB
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Goal> Goals { get; set; }
-        public DbSet<SubGoals> SubGoals { get; set; }
+        public DbSet<MileStone> MileStones { get; set; }
     }
 
 }

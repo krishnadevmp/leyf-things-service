@@ -1,6 +1,6 @@
 ﻿namespace LeyfThings.Models
 {
-    public class SubGoals
+    public class MileStone
     {
         public Guid Id { get; set; }
         public string Title { get; set; }

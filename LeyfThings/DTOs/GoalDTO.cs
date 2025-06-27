@@ -8,6 +8,6 @@
         public DateTime? TargetDate { get; set; }
         public string Priority { get; set; }
         public string Status { get; set; }
-        public List<SubGoalDTO> SubGoals { get; set; } = new();
+        public List<MileStoneDTO> MileStones { get; set; } = new();
     }
 }
