@@ -25,9 +25,6 @@ Thumbs.db
 packages/
 .nuget/
 
-## Entity Framework
-Migrations/
-
 ## Publish output
 publish/
 
