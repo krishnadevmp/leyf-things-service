@@ -1,6 +1,7 @@
 ﻿using LeyfThings.DTOs;
 using LeyfThings.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LeyfThings.Controllers
 {
@@ -43,6 +44,18 @@ namespace LeyfThings.Controllers
         {
             var success = await _goalService.UpdateGoalAsync(id, dto);
             return success ? NoContent() : NotFound();
+        }
+
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdateGoalStatus(Guid id, [FromBody] StatusUpdateDto dto)
+        {
+            var success = await _goalService.UpdateGoalStatusAsync(id, dto.Status);
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
 
         [HttpDelete("{id}")]

@@ -91,6 +91,19 @@ namespace LeyfThings.Services
             return true;
         }
 
+        public async Task<bool> UpdateGoalStatusAsync(Guid id, string status)
+        {
+            var goal = await _context.Goals.FindAsync(id);
+            if (goal == null)
+            {
+                return false;
+            }
+
+            goal.Status = status;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> DeleteGoalAsync(Guid id)
         {
             var goal = await _context.Goals.FindAsync(id);

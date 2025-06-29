@@ -9,6 +9,7 @@ namespace LeyfThings.Services
         Task<Goal?> GetGoalAsync(Guid id);
         Task<Goal> CreateGoalAsync(GoalDTO dto);
         Task<bool> UpdateGoalAsync(Guid id, GoalDTO dto);
+        Task<bool> UpdateGoalStatusAsync(Guid id, string status);
         Task<bool> DeleteGoalAsync(Guid id);
     }
 }
