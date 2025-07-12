@@ -44,14 +44,10 @@ namespace LeyfThings.Services
                 {
                     Id = Guid.NewGuid(),
                     Title = s.Title,
-                    IsComplete = s.IsComplete,
+                    Status = s.Status,
                     DueDate = s.DueDate
                 }).ToList()
             };
-
-            // Auto-calculate progress
-            goal.Progress = goal.MileStones.Count == 0 ? 0 :
-                (int)(goal.MileStones.Count(s => s.IsComplete) * 100.0 / goal.MileStones.Count);
 
             _context.Goals.Add(goal);
             await _context.SaveChangesAsync();
@@ -79,13 +75,9 @@ namespace LeyfThings.Services
             {
                 Id = Guid.NewGuid(),
                 Title = s.Title,
-                IsComplete = s.IsComplete,
+                Status = s.Status,
                 DueDate = s.DueDate
             }).ToList();
-
-            // Recalculate progress
-            goal.Progress = goal.MileStones.Count == 0 ? 0 :
-                (int)(goal.MileStones.Count(s => s.IsComplete) * 100.0 / goal.MileStones.Count);
 
             await _context.SaveChangesAsync();
             return true;
