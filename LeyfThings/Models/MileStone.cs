@@ -1,4 +1,6 @@
-﻿namespace LeyfThings.Models
+﻿using System.Text.Json.Serialization;
+
+namespace LeyfThings.Models
 {
     public class MileStone
     {
@@ -8,6 +10,7 @@
         public DateTime? DueDate { get; set; }
 
         public Guid GoalId { get; set; }
+        [JsonIgnore]
         public Goal Goal { get; set; }
     }
 }
