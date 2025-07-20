@@ -73,7 +73,6 @@ namespace LeyfThings.Services
             _context.MileStones.RemoveRange(goal.MileStones);
             goal.MileStones = dto.MileStones.Select(s => new MileStone
             {
-                Id = Guid.NewGuid(),
                 Title = s.Title,
                 Status = s.Status,
                 DueDate = s.DueDate
