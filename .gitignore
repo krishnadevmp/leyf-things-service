@@ -46,3 +46,4 @@ wwwroot/node_modules/
 .env
 .env.*
 secrets.json
+*/appsettings.Development.json

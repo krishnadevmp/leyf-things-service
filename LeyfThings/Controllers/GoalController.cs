@@ -5,16 +5,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LeyfThings.Controllers
 {
-    // Controllers/GoalsController.cs
     [ApiController]
     [Route("api/[controller]")]
     public class GoalsController : ControllerBase
     {
         private readonly IGoalService _goalService;
+        private readonly IOpenAIService _openAIService;
 
-        public GoalsController(IGoalService goalService)
+        public GoalsController(IGoalService goalService, IOpenAIService openAIService)
         {
             _goalService = goalService;
+            _openAIService = openAIService;
         }
 
         [HttpGet]
@@ -63,6 +64,30 @@ namespace LeyfThings.Controllers
         {
             var success = await _goalService.DeleteGoalAsync(id);
             return success ? NoContent() : NotFound();
+        }
+
+        /// <summary>
+        /// General AI chat endpoint
+        /// </summary>
+        [HttpPost("chat")]
+        public async Task<IActionResult> Chat([FromBody] ChatRequestDTO request)
+        {
+            if (string.IsNullOrEmpty(request.Prompt))
+                return BadRequest(new { error = "Please provide a message" });
+
+            try
+            {
+                var createdGoalDTO = await _openAIService.ExtractGoalDataAsync(request.Prompt);
+                if (createdGoalDTO == null)
+                    return StatusCode(500, "Cannot create the goal");
+                var goal = await _goalService.CreateGoalAsync(createdGoalDTO);
+                return CreatedAtAction(nameof(GetGoal), new { id = goal.Id }, goal);
+            }
+            catch (Exception ex)
+            {
+                
+                return StatusCode(500, new { error = "Something went wrong." });
+            }
         }
     }
 
