@@ -45,5 +45,9 @@ wwwroot/node_modules/
 ## Environment files
 .env
 .env.*
-secrets.json
-*/appsettings.Development.json
+
+## App settings
+appsettings.json
+appsettings.*.json
+
+
