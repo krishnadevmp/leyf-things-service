@@ -1,7 +1,7 @@
-﻿using LeyfThings.DTOs;
+using LeyfThings.DTOs;
+using LeyfThings.Exceptions;
 using LeyfThings.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace LeyfThings.Controllers
 {
@@ -29,7 +29,6 @@ namespace LeyfThings.Controllers
         public async Task<IActionResult> GetGoal(Guid id)
         {
             var goal = await _goalService.GetGoalAsync(id);
-            if (goal == null) return NotFound();
             return Ok(goal);
         }
 
@@ -43,52 +42,33 @@ namespace LeyfThings.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateGoal(Guid id, [FromBody] GoalDTO dto)
         {
-            var success = await _goalService.UpdateGoalAsync(id, dto);
-            return success ? NoContent() : NotFound();
+            await _goalService.UpdateGoalAsync(id, dto);
+            return NoContent();
         }
 
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> UpdateGoalStatus(Guid id, [FromBody] StatusUpdateDto dto)
         {
-            var success = await _goalService.UpdateGoalStatusAsync(id, dto.Status);
-            if (!success)
-            {
-                return NotFound();
-            }
-
+            await _goalService.UpdateGoalStatusAsync(id, dto.Status);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGoal(Guid id)
         {
-            var success = await _goalService.DeleteGoalAsync(id);
-            return success ? NoContent() : NotFound();
+            await _goalService.DeleteGoalAsync(id);
+            return NoContent();
         }
 
-        /// <summary>
-        /// General AI chat endpoint
-        /// </summary>
         [HttpPost("chat")]
         public async Task<IActionResult> Chat([FromBody] ChatRequestDTO request)
         {
             if (string.IsNullOrEmpty(request.Prompt))
-                return BadRequest(new { error = "Please provide a message" });
+                throw new ValidationException("Prompt is required.");
 
-            try
-            {
-                var createdGoalDTO = await _openAIService.ExtractGoalDataAsync(request.Prompt);
-                if (createdGoalDTO == null)
-                    return StatusCode(500, "Cannot create the goal");
-                var goal = await _goalService.CreateGoalAsync(createdGoalDTO);
-                return CreatedAtAction(nameof(GetGoal), new { id = goal.Id }, goal);
-            }
-            catch (Exception ex)
-            {
-                
-                return StatusCode(500, new { error = "Something went wrong." });
-            }
+            var createdGoalDTO = await _openAIService.ExtractGoalDataAsync(request.Prompt);
+            var goal = await _goalService.CreateGoalAsync(createdGoalDTO);
+            return CreatedAtAction(nameof(GetGoal), new { id = goal.Id }, goal);
         }
     }
-
 }

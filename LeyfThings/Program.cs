@@ -1,6 +1,11 @@
+using LeyfThings.Exceptions;
 using LeyfThings.LeyfThingsDB;
+using LeyfThings.Middleware;
+using LeyfThings.Models;
 using LeyfThings.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +23,32 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
-builder.Services.AddControllers();
+
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            var response = new ErrorResponse
+            {
+                Type = "ValidationError",
+                Status = StatusCodes.Status400BadRequest,
+                Message = "One or more validation errors occurred.",
+                TraceId = context.HttpContext.TraceIdentifier,
+                Errors = errors
+            };
+
+            return new BadRequestObjectResult(response);
+        };
+    });
+
 builder.Services.AddHttpClient();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -30,6 +60,9 @@ builder.Services.AddScoped<IOpenAIService, OpenAIService>();
 
 
 var app = builder.Build();
+
+// Global exception handling — must be first in the pipeline
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -1,4 +1,4 @@
-﻿using LeyfThings.DTOs;
+using LeyfThings.DTOs;
 using LeyfThings.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,7 +6,6 @@ namespace LeyfThings.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
     public class MilestonesController : ControllerBase
     {
         private readonly IMileStoneService _milestoneService;
@@ -27,7 +26,7 @@ namespace LeyfThings.Controllers
         public async Task<IActionResult> GetMilestone(Guid id)
         {
             var milestone = await _milestoneService.GetMilestoneAsync(id);
-            return milestone == null ? NotFound() : Ok(milestone);
+            return Ok(milestone);
         }
 
         [HttpPost]
@@ -40,22 +39,22 @@ namespace LeyfThings.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMilestone(Guid id, [FromBody] MileStoneDTO dto)
         {
-            var success = await _milestoneService.UpdateMilestoneAsync(id, dto);
-            return success ? NoContent() : NotFound();
+            await _milestoneService.UpdateMilestoneAsync(id, dto);
+            return NoContent();
         }
 
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> UpdateMilestoneStatus(Guid id, [FromBody] StatusUpdateDto dto)
         {
-            var success = await _milestoneService.UpdateMilestoneStatusAsync(id, dto.Status);
-            return success ? NoContent() : NotFound();
+            await _milestoneService.UpdateMilestoneStatusAsync(id, dto.Status);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMilestone(Guid id)
         {
-            var success = await _milestoneService.DeleteMilestoneAsync(id);
-            return success ? NoContent() : NotFound();
+            await _milestoneService.DeleteMilestoneAsync(id);
+            return NoContent();
         }
     }
 }

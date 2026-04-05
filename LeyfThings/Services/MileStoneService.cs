@@ -1,4 +1,5 @@
-﻿using LeyfThings.DTOs;
+using LeyfThings.DTOs;
+using LeyfThings.Exceptions;
 using LeyfThings.LeyfThingsDB;
 using LeyfThings.Models;
 using Microsoft.EntityFrameworkCore;
@@ -29,10 +30,12 @@ namespace LeyfThings.Services
                 .ToListAsync();
         }
 
-        public async Task<MileStoneDTO?> GetMilestoneAsync(Guid id)
+        public async Task<MileStoneDTO> GetMilestoneAsync(Guid id)
         {
             var m = await _context.MileStones.FindAsync(id);
-            if (m == null) return null;
+
+            if (m == null)
+                throw new NotFoundException(nameof(MileStone), id);
 
             return new MileStoneDTO
             {
@@ -48,7 +51,8 @@ namespace LeyfThings.Services
         {
             var goalExists = await _context.Goals.AnyAsync(g => g.Id == dto.GoalId);
             if (!goalExists)
-                throw new ArgumentException("Invalid GoalId. Cannot create milestone.");
+                throw new ValidationException($"GoalId '{dto.GoalId}' does not exist.");
+
             var entity = new MileStone
             {
                 Id = Guid.NewGuid(),
@@ -64,10 +68,12 @@ namespace LeyfThings.Services
             return dto;
         }
 
-        public async Task<bool> UpdateMilestoneAsync(Guid id, MileStoneDTO dto)
+        public async Task UpdateMilestoneAsync(Guid id, MileStoneDTO dto)
         {
             var milestone = await _context.MileStones.FindAsync(id);
-            if (milestone == null) return false;
+
+            if (milestone == null)
+                throw new NotFoundException(nameof(MileStone), id);
 
             milestone.Title = dto.Title;
             milestone.Status = dto.Status;
@@ -75,28 +81,28 @@ namespace LeyfThings.Services
             milestone.GoalId = dto.GoalId;
 
             await _context.SaveChangesAsync();
-            return true;
         }
-        public async Task<bool> UpdateMilestoneStatusAsync(Guid id, string status)
+
+        public async Task UpdateMilestoneStatusAsync(Guid id, string status)
         {
             var milestone = await _context.MileStones.FindAsync(id);
-            if (milestone == null) return false;
+
+            if (milestone == null)
+                throw new NotFoundException(nameof(MileStone), id);
 
             milestone.Status = status;
             await _context.SaveChangesAsync();
-            return true;
         }
 
-
-        public async Task<bool> DeleteMilestoneAsync(Guid id)
+        public async Task DeleteMilestoneAsync(Guid id)
         {
             var milestone = await _context.MileStones.FindAsync(id);
-            if (milestone == null) return false;
+
+            if (milestone == null)
+                throw new NotFoundException(nameof(MileStone), id);
 
             _context.MileStones.Remove(milestone);
             await _context.SaveChangesAsync();
-            return true;
         }
     }
-
 }

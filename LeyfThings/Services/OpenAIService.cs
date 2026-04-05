@@ -1,5 +1,6 @@
 ﻿using Azure.AI.OpenAI;
 using LeyfThings.DTOs;
+using LeyfThings.Exceptions;
 using OpenAI.Chat;
 using System.Text.Json;
 using System.ClientModel;
@@ -26,9 +27,9 @@ namespace LeyfThings.Services
         public async Task<GoalDTO> ExtractGoalDataAsync(string userMessage)
         {
             var systemPrompt = @"
-                You are a helpful assistant that extracts goal and milestone 
+                You are a helpful assistant that extracts goal and milestone
                 information from natural language.
-                
+
                 Always respond ONLY with a valid JSON object in this exact format:
                 {
                     ""title"": ""Learn docker"",
@@ -66,14 +67,33 @@ namespace LeyfThings.Services
                 Temperature = 0.1f
             };
 
-            ChatCompletion completion = await chatClient.CompleteChatAsync(messages, options);
+            ChatCompletion completion;
+            try
+            {
+                completion = await chatClient.CompleteChatAsync(messages, options);
+            }
+            catch (Exception ex)
+            {
+                throw new ExternalServiceException("Azure OpenAI", "Failed to communicate with Azure OpenAI.", ex);
+            }
+
             var aiReply = completion.Content[0].Text;
 
-            // Parse the JSON response
-            var goalData = JsonSerializer.Deserialize<GoalDTO>(aiReply, new JsonSerializerOptions
+            GoalDTO? goalData;
+            try
             {
-                PropertyNameCaseInsensitive = true
-            });
+                goalData = JsonSerializer.Deserialize<GoalDTO>(aiReply, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new ExternalServiceException("Azure OpenAI", "Received an invalid response from Azure OpenAI.", ex);
+            }
+
+            if (goalData == null)
+                throw new ExternalServiceException("Azure OpenAI", "Azure OpenAI returned an empty response.");
 
             return goalData;
         }

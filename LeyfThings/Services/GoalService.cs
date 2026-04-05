@@ -1,11 +1,11 @@
-﻿using LeyfThings.DTOs;
+using LeyfThings.DTOs;
+using LeyfThings.Exceptions;
 using LeyfThings.LeyfThingsDB;
 using LeyfThings.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace LeyfThings.Services
 {
-    // Services/GoalService.cs
     public class GoalService : IGoalService
     {
         private readonly AppDbContext _context;
@@ -22,11 +22,16 @@ namespace LeyfThings.Services
                 .ToListAsync();
         }
 
-        public async Task<Goal?> GetGoalAsync(Guid id)
+        public async Task<Goal> GetGoalAsync(Guid id)
         {
-            return await _context.Goals
+            var goal = await _context.Goals
                 .Include(g => g.MileStones)
                 .FirstOrDefaultAsync(g => g.Id == id);
+
+            if (goal == null)
+                throw new NotFoundException(nameof(Goal), id);
+
+            return goal;
         }
 
         public async Task<Goal> CreateGoalAsync(GoalDTO dto)
@@ -54,13 +59,14 @@ namespace LeyfThings.Services
             return goal;
         }
 
-        public async Task<bool> UpdateGoalAsync(Guid id, GoalDTO dto)
+        public async Task UpdateGoalAsync(Guid id, GoalDTO dto)
         {
             var goal = await _context.Goals
                 .Include(g => g.MileStones)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
-            if (goal == null) return false;
+            if (goal == null)
+                throw new NotFoundException(nameof(Goal), id);
 
             goal.Title = dto.Title;
             goal.Description = dto.Description;
@@ -69,7 +75,6 @@ namespace LeyfThings.Services
             goal.Priority = dto.Priority;
             goal.Status = dto.Status;
 
-            // Replace milestones
             _context.MileStones.RemoveRange(goal.MileStones);
             goal.MileStones = dto.MileStones.Select(s => new MileStone
             {
@@ -79,31 +84,28 @@ namespace LeyfThings.Services
             }).ToList();
 
             await _context.SaveChangesAsync();
-            return true;
         }
 
-        public async Task<bool> UpdateGoalStatusAsync(Guid id, string status)
+        public async Task UpdateGoalStatusAsync(Guid id, string status)
         {
             var goal = await _context.Goals.FindAsync(id);
+
             if (goal == null)
-            {
-                return false;
-            }
+                throw new NotFoundException(nameof(Goal), id);
 
             goal.Status = status;
             await _context.SaveChangesAsync();
-            return true;
         }
 
-        public async Task<bool> DeleteGoalAsync(Guid id)
+        public async Task DeleteGoalAsync(Guid id)
         {
             var goal = await _context.Goals.FindAsync(id);
-            if (goal == null) return false;
+
+            if (goal == null)
+                throw new NotFoundException(nameof(Goal), id);
 
             _context.Goals.Remove(goal);
             await _context.SaveChangesAsync();
-            return true;
         }
     }
-
 }
